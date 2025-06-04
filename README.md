@@ -30,7 +30,7 @@ A decentralized betting platform that allows users to bet on cryptocurrency pric
 
 ```bash
 git clone https://github.com/UrosCBS/beth.git
-cd Beth
+cd beth
 ```
 
 2. Install Foundry dependencies:
@@ -165,9 +165,14 @@ The platform consists of two main components:
 - Secure price feed integration
 - Access control for admin functions
 
-## Team
+## 👥 Team
 
-[Add your team information here]
+| Name             | GitHub Profile                               |
+| ---------------- | -------------------------------------------- |
+| Uroš Žigić       | [@UrosCBS](https://github.com/UrosCBS)       |
+| Darko Panić      | [@DarkoCBS](https://github.com/DarkoCBS)     |
+| Cvijan Đukanović | [@CvijanCBS](https://github.com/CvijanCBS)   |
+| Momčilo Miković  | [@MomciloCBS](https://github.com/MomciloCBS) |
 
 ## Demo Video
 
