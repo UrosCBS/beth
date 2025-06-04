@@ -58,9 +58,18 @@ contract TelegramMultiTokenPriceBettingTest is Test {
     event TokenAdded(bytes32 indexed tokenId, string symbol, string name, address oracle);
     event TokenUpdated(bytes32 indexed tokenId, address newOracle);
     event TokenStatusChanged(bytes32 indexed tokenId, bool isActive);
-    event BetCreated(uint256 indexed betId, bytes32 indexed tokenId, uint256 startTime, uint256 endTime, int256 startPrice);
-    event BetPlaced(uint256 indexed betId, address indexed user, uint256 amount, TelegramMultiTokenPriceBetting.Direction direction);
-    event BetResolved(uint256 indexed betId, bytes32 indexed tokenId, int256 endPrice, TelegramMultiTokenPriceBetting.Direction winningDirection);
+    event BetCreated(
+        uint256 indexed betId, bytes32 indexed tokenId, uint256 startTime, uint256 endTime, int256 startPrice
+    );
+    event BetPlaced(
+        uint256 indexed betId, address indexed user, uint256 amount, TelegramMultiTokenPriceBetting.Direction direction
+    );
+    event BetResolved(
+        uint256 indexed betId,
+        bytes32 indexed tokenId,
+        int256 endPrice,
+        TelegramMultiTokenPriceBetting.Direction winningDirection
+    );
     event RewardClaimed(uint256 indexed betId, address indexed user, uint256 amount);
     event BotAddressUpdated(address oldBot, address newBot);
     event MinimumBetUpdated(uint256 oldMin, uint256 newMin);
@@ -79,14 +88,27 @@ contract TelegramMultiTokenPriceBettingTest is Test {
 
         // Deploy mock oracles
         btcOracle = new MockAggregator(50000 * 1e8, 8); // $50,000 BTC
-        ethOracle = new MockAggregator(3000 * 1e8, 8);  // $3,000 ETH
-        linkOracle = new MockAggregator(15 * 1e8, 8);   // $15 LINK
+        ethOracle = new MockAggregator(3000 * 1e8, 8); // $3,000 ETH
+        linkOracle = new MockAggregator(15 * 1e8, 8); // $15 LINK
 
         // Deploy betting contract
-        TelegramMultiTokenPriceBetting.TokenConfig[] memory configs = new TelegramMultiTokenPriceBetting.TokenConfig[](3);
-        configs[0] = TelegramMultiTokenPriceBetting.TokenConfig({symbol: "BTC", name: "Bitcoin", priceOracle: address(btcOracle)});
-        configs[1] = TelegramMultiTokenPriceBetting.TokenConfig({symbol: "ETH", name: "Ethereum", priceOracle: address(ethOracle)});
-        configs[2] = TelegramMultiTokenPriceBetting.TokenConfig({symbol: "LINK", name: "Chainlink", priceOracle: address(linkOracle)});
+        TelegramMultiTokenPriceBetting.TokenConfig[] memory configs =
+            new TelegramMultiTokenPriceBetting.TokenConfig[](3);
+        configs[0] = TelegramMultiTokenPriceBetting.TokenConfig({
+            symbol: "BTC",
+            name: "Bitcoin",
+            priceOracle: address(btcOracle)
+        });
+        configs[1] = TelegramMultiTokenPriceBetting.TokenConfig({
+            symbol: "ETH",
+            name: "Ethereum",
+            priceOracle: address(ethOracle)
+        });
+        configs[2] = TelegramMultiTokenPriceBetting.TokenConfig({
+            symbol: "LINK",
+            name: "Chainlink",
+            priceOracle: address(linkOracle)
+        });
         bettingContract = new TelegramMultiTokenPriceBetting(bot, configs);
 
         // // Add tokens
@@ -101,12 +123,25 @@ contract TelegramMultiTokenPriceBettingTest is Test {
 
     // Test Constructor
     function test_Constructor() public {
-        TelegramMultiTokenPriceBetting.TokenConfig[] memory configs = new TelegramMultiTokenPriceBetting.TokenConfig[](3);
-        configs[0] = TelegramMultiTokenPriceBetting.TokenConfig({symbol: "BTC", name: "Bitcoin", priceOracle: address(btcOracle)});
-        configs[1] = TelegramMultiTokenPriceBetting.TokenConfig({symbol: "ETH", name: "Ethereum", priceOracle: address(ethOracle)});
-        configs[2] = TelegramMultiTokenPriceBetting.TokenConfig({symbol: "LINK", name: "Chainlink", priceOracle: address(linkOracle)});
+        TelegramMultiTokenPriceBetting.TokenConfig[] memory configs =
+            new TelegramMultiTokenPriceBetting.TokenConfig[](3);
+        configs[0] = TelegramMultiTokenPriceBetting.TokenConfig({
+            symbol: "BTC",
+            name: "Bitcoin",
+            priceOracle: address(btcOracle)
+        });
+        configs[1] = TelegramMultiTokenPriceBetting.TokenConfig({
+            symbol: "ETH",
+            name: "Ethereum",
+            priceOracle: address(ethOracle)
+        });
+        configs[2] = TelegramMultiTokenPriceBetting.TokenConfig({
+            symbol: "LINK",
+            name: "Chainlink",
+            priceOracle: address(linkOracle)
+        });
         TelegramMultiTokenPriceBetting newContract = new TelegramMultiTokenPriceBetting(bot, configs);
-        
+
         assertEq(newContract.botAddress(), bot);
         assertEq(newContract.owner(), address(this));
         assertEq(newContract.getCurrentBetId(), 0);
@@ -117,13 +152,14 @@ contract TelegramMultiTokenPriceBettingTest is Test {
     // Test Token Management
     function test_AddToken() public {
         MockAggregator newOracle = new MockAggregator(100 * 1e8, 8);
-        
+
         vm.expectEmit(true, false, false, true);
         emit TokenAdded(keccak256(abi.encodePacked("TEST")), "TEST", "Test Token", address(newOracle));
-        
+
         bettingContract.addToken("TEST", "Test Token", address(newOracle));
-        
-        TelegramMultiTokenPriceBetting.TokenInfo memory tokenInfo = bettingContract.getTokenInfo(keccak256(abi.encodePacked("TEST")));
+
+        TelegramMultiTokenPriceBetting.TokenInfo memory tokenInfo =
+            bettingContract.getTokenInfo(keccak256(abi.encodePacked("TEST")));
         assertEq(tokenInfo.symbol, "TEST");
         assertEq(tokenInfo.name, "Test Token");
         assertEq(address(tokenInfo.priceOracle), address(newOracle));
@@ -143,6 +179,4 @@ contract TelegramMultiTokenPriceBettingTest is Test {
         vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user1));
         bettingContract.addToken("TEST", "Test Token", address(btcOracle));
     }
-
-    
 }
