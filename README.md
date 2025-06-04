@@ -59,8 +59,12 @@ Create a `.env` file in the root directory with the following variables:
 ```env
 PRIVATE_KEY=
 BOT_ADDRESS=
+BOT_TOKEN=
 RPC_URL=
 ETHERSCAN_API_KEY=
+MONGODB_URI=
+CONTRACT_ADDRESS=
+
 ```
 
 ## Smart Contract Deployment
@@ -79,7 +83,13 @@ forge script script script/DeployTelegramBetting.s.sol:DeployTelegramBetting --r
 
 ## Running the Telegram Bot
 
-1. Start the bot:
+1. Run local monggo DB instance
+
+```bash
+docker run -d -p 27017:27017 -v /data/db:/data/db --name mongodb mongo
+``` 
+
+2. Start the bot:
 
 ```bash
 cd bot

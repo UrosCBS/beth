@@ -301,11 +301,11 @@ bot.command('placebet', async (ctx) => {
         const userContract = contract.connect(userWalletInstance);
 
         const tx = await userContract.placeBet(betId, directionValue, { value: amountWei, gasLimit: 5000000 });
-        await ctx.reply(`Placing your bet... Transaction hash: ${tx.hash}`, mainMenu);
+        await ctx.reply(`Placing your bet... `, mainMenu);
         
         const receipt = await tx.wait();
         if (receipt.status === 1) {
-            await ctx.reply('✅ Bet placed successfully!', mainMenu);
+            await ctx.reply(`✅ Bet placed successfully! Transaction hash: ${tx.hash}`, mainMenu);
         } else {
             await ctx.reply('❌ Transaction failed. Please try again.', mainMenu);
         }
