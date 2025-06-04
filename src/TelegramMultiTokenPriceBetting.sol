@@ -70,7 +70,9 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
     event TokenAdded(bytes32 indexed tokenId, string symbol, string name, address oracle);
     event TokenUpdated(bytes32 indexed tokenId, address newOracle);
     event TokenStatusChanged(bytes32 indexed tokenId, bool isActive);
-    event BetCreated(uint256 indexed betId, bytes32 indexed tokenId, uint256 startTime, uint256 endTime, int256 startPrice);
+    event BetCreated(
+        uint256 indexed betId, bytes32 indexed tokenId, uint256 startTime, uint256 endTime, int256 startPrice
+    );
     event BetPlaced(uint256 indexed betId, address indexed user, uint256 amount, Direction direction);
     event BetResolved(uint256 indexed betId, bytes32 indexed tokenId, int256 endPrice, Direction winningDirection);
     event RewardClaimed(uint256 indexed betId, address indexed user, uint256 amount);
@@ -100,17 +102,17 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
         for (uint256 i = 0; i < _initialTokens.length; i++) {
             bytes32 tokenId = keccak256(abi.encodePacked(_initialTokens[i].symbol));
             require(address(tokens[tokenId].priceOracle) == address(0), "Token already exists");
-            
+
             AggregatorV3Interface oracle = AggregatorV3Interface(_initialTokens[i].priceOracle);
             uint8 decimals = oracle.decimals();
-            
+
             tokens[tokenId] = TokenInfo({
                 symbol: _initialTokens[i].symbol,
                 name: _initialTokens[i].name,
                 priceOracle: oracle,
                 isActive: true,
                 decimals: decimals
-            });   
+            });
 
             emit TokenAdded(tokenId, _initialTokens[i].symbol, _initialTokens[i].name, _initialTokens[i].priceOracle);
         }
@@ -119,25 +121,16 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
     /**
      * @dev Add a new token with its price oracle
      */
-    function addToken(
-        string memory _symbol,
-        string memory _name,
-        address _priceOracle
-    ) external onlyOwner {
+    function addToken(string memory _symbol, string memory _name, address _priceOracle) external onlyOwner {
         bytes32 tokenId = keccak256(abi.encodePacked(_symbol));
         require(address(tokens[tokenId].priceOracle) == address(0), "Token already exists");
-        
+
         AggregatorV3Interface oracle = AggregatorV3Interface(_priceOracle);
         uint8 decimals = oracle.decimals();
-        
-        tokens[tokenId] = TokenInfo({
-            symbol: _symbol,
-            name: _name,
-            priceOracle: oracle,
-            isActive: true,
-            decimals: decimals
-        });
-                
+
+        tokens[tokenId] =
+            TokenInfo({symbol: _symbol, name: _name, priceOracle: oracle, isActive: true, decimals: decimals});
+
         emit TokenAdded(tokenId, _symbol, _name, _priceOracle);
     }
 
@@ -146,10 +139,10 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
      */
     function updateTokenOracle(bytes32 _tokenId, address _newOracle) external onlyOwner {
         require(address(tokens[_tokenId].priceOracle) != address(0), "Token does not exist");
-        
+
         tokens[_tokenId].priceOracle = AggregatorV3Interface(_newOracle);
         tokens[_tokenId].decimals = AggregatorV3Interface(_newOracle).decimals();
-        
+
         emit TokenUpdated(_tokenId, _newOracle);
     }
 
@@ -167,10 +160,10 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
      */
     function createBet(bytes32 _tokenId) external onlyBot whenNotPaused validToken(_tokenId) {
         currentBetId++;
-        
-        (, int256 currentPrice,,uint256 updatedAt,) = tokens[_tokenId].priceOracle.latestRoundData();
 
-        if (updatedAt < block.timestamp - 20 * 60 /* 20 minutes */) {
+        (, int256 currentPrice,, uint256 updatedAt,) = tokens[_tokenId].priceOracle.latestRoundData();
+
+        if (updatedAt < block.timestamp - 20 * 60 /* 20 minutes */ ) {
             revert("stale price feed");
         }
 
@@ -397,7 +390,7 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
     function getActiveBetsForTokens(bytes32[] calldata _tokenIds) external view returns (uint256[] memory activeBets) {
         uint256 count = 0;
         uint256[] memory tempBets = new uint256[](currentBetId);
-        
+
         for (uint256 i = 1; i <= currentBetId; i++) {
             Bet storage bet = bets[i];
             if (bet.status == BetStatus.ACTIVE) {
@@ -410,7 +403,7 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
                 }
             }
         }
-        
+
         activeBets = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {
             activeBets[i] = tempBets[i];

@@ -14,33 +14,22 @@ contract DeployTelegramBetting is Script {
         address BTC_USD_FEED = 0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43;
         address LINK_USD_FEED = 0xc59E3633BAAC79493d908e63626716e204A45EdF;
 
-        TelegramMultiTokenPriceBetting.TokenConfig[] memory initialTokens = new TelegramMultiTokenPriceBetting.TokenConfig[](3);
-        
-        initialTokens[0] = TelegramMultiTokenPriceBetting.TokenConfig({
-            symbol: "ETH",
-            name: "Ethereum",
-            priceOracle: ETH_USD_FEED
-        });
+        TelegramMultiTokenPriceBetting.TokenConfig[] memory initialTokens =
+            new TelegramMultiTokenPriceBetting.TokenConfig[](3);
 
-        initialTokens[1] = TelegramMultiTokenPriceBetting.TokenConfig({
-            symbol: "BTC",
-            name: "Bitcoin",
-            priceOracle: BTC_USD_FEED
-        });
+        initialTokens[0] =
+            TelegramMultiTokenPriceBetting.TokenConfig({symbol: "ETH", name: "Ethereum", priceOracle: ETH_USD_FEED});
 
-        initialTokens[2] = TelegramMultiTokenPriceBetting.TokenConfig({
-            symbol: "LINK",
-            name: "Chainlink",
-            priceOracle: LINK_USD_FEED
-        });
+        initialTokens[1] =
+            TelegramMultiTokenPriceBetting.TokenConfig({symbol: "BTC", name: "Bitcoin", priceOracle: BTC_USD_FEED});
+
+        initialTokens[2] =
+            TelegramMultiTokenPriceBetting.TokenConfig({symbol: "LINK", name: "Chainlink", priceOracle: LINK_USD_FEED});
 
         vm.startBroadcast(deployerPrivateKey);
-        
-        TelegramMultiTokenPriceBetting betting = new TelegramMultiTokenPriceBetting(
-            botAddress,
-            initialTokens
-        );
+
+        TelegramMultiTokenPriceBetting betting = new TelegramMultiTokenPriceBetting(botAddress, initialTokens);
 
         vm.stopBroadcast();
     }
-} 
+}
