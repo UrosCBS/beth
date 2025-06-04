@@ -148,6 +148,8 @@ bot.hears(['ETH', 'BTC', 'LINK'], async (ctx) => {
             return;
         }
 
+        await ctx.reply('Creating a bet...');
+
         const tx = await contractWithSigner.createBet(tokenId, { gasLimit: 500000 });
         const receipt = await tx.wait();
 
