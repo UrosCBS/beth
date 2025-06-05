@@ -21,11 +21,21 @@ let db;
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
 const contractAddress = process.env.CONTRACT_ADDRESS;
 const contractABI = require('./TelegramMultiTokenPriceBetting.json').abi;
+
+const nftContractAddress = process.env.NFT_CONTRACT_ADDRESS;
+const nftContractABI = require('./BetNFT.json').abi;
 const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+const nftContract = new ethers.Contract(nftContractAddress, nftContractABI, provider);
 
 // Initialize wallet for signing transactions
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const contractWithSigner = contract.connect(wallet);
+const nftContractWithSigner = nftContract.connect(wallet);
+
+
+let currentTokenID = 0; // Start token ID for NFT minting
+
 
 // Connect to MongoDB
 async function connectDB() {
@@ -357,6 +367,11 @@ async function checkAndResolveBets() {
                                 const userWalletInstance = new ethers.Wallet(userWallet.privateKey, provider);
                                 const userContract = contract.connect(userWalletInstance);
                                 const tx = await userContract.claimReward(i, { gasLimit: 5000000 });
+
+                                const tx2 = await nftContract.mint(participant, currentTokenID, { gasLimit: 5000000 });
+
+                                currentTokenID++;
+
                                 const reward = await userContract.calculatePotentialReward(i, participant);
                                 const rewardEth = ethers.utils.formatEther(reward);
                                 
