@@ -239,8 +239,6 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
 
         (, int256 endPrice,,,) = tokens[bet.tokenId].priceOracle.latestRoundData();
 
-        // STA AKO BUDE STALE PRICE OVDE, A BET TREBA DA SE RESOLVUJE
-
         bet.endPrice = endPrice;
         bet.status = BetStatus.RESOLVED;
         bet.resolved = true;
