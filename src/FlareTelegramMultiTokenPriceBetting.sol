@@ -112,7 +112,7 @@ contract FlareTelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausab
             require(tokens[tokenId].feedId == bytes21(0), "Token already exists");
 
             bytes21 feedId = feedIdConverter.getFeedId(1, _initialTokens[i].feedSymbol);
-            (, int8 decimals, ) = ftsoV2.getFeedById(feedId);
+            (, int8 decimals,) = ftsoV2.getFeedById(feedId);
 
             tokens[tokenId] = TokenInfo({
                 symbol: _initialTokens[i].symbol,
@@ -134,7 +134,7 @@ contract FlareTelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausab
         require(tokens[tokenId].feedId == bytes21(0), "Token already exists");
 
         bytes21 feedId = feedIdConverter.getFeedId(1, _feedSymbol);
-        (, int8 decimals, ) = ftsoV2.getFeedById(feedId);
+        (, int8 decimals,) = ftsoV2.getFeedById(feedId);
 
         tokens[tokenId] =
             TokenInfo({symbol: _symbol, name: _name, feedId: feedId, isActive: true, decimals: uint8(uint8(decimals))});
@@ -149,7 +149,7 @@ contract FlareTelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausab
         require(tokens[_tokenId].feedId != bytes21(0), "Token does not exist");
 
         bytes21 newFeedId = feedIdConverter.getFeedId(1, _newFeedSymbol);
-        (, int8 decimals, ) = ftsoV2.getFeedById(newFeedId);
+        (, int8 decimals,) = ftsoV2.getFeedById(newFeedId);
         tokens[_tokenId].feedId = newFeedId;
         tokens[_tokenId].decimals = uint8(uint8(decimals));
 
@@ -249,7 +249,7 @@ contract FlareTelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausab
         require(block.timestamp >= bet.endTime, "Bet still active");
 
         TokenInfo storage token = tokens[bet.tokenId];
-        (uint256 endPrice, ) = ftsoV2.getFeedByIdInWei(token.feedId);
+        (uint256 endPrice,) = ftsoV2.getFeedByIdInWei(token.feedId);
 
         bet.endPrice = int256(endPrice);
         bet.status = BetStatus.RESOLVED;
