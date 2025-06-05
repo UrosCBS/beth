@@ -136,8 +136,7 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
         bytes21 feedId = feedIdConverter.getFeedId(1, _feedSymbol);
         uint8 decimals = priceReader.getDecimals(feedId);
 
-        tokens[tokenId] =
-            TokenInfo({symbol: _symbol, name: _name, feedId: feedId, isActive: true, decimals: decimals});
+        tokens[tokenId] = TokenInfo({symbol: _symbol, name: _name, feedId: feedId, isActive: true, decimals: decimals});
 
         emit TokenAdded(tokenId, _symbol, _name, feedId);
     }
