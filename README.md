@@ -88,7 +88,7 @@ forge script script script/DeployTelegramBetting.s.sol:DeployTelegramBetting --r
 
 ```bash
 docker run -d -p 27017:27017 -v /data/db:/data/db --name mongodb mongo
-``` 
+```
 
 2. Start the bot:
 
@@ -187,7 +187,7 @@ The platform consists of two main components:
 
 ## Demo Video
 
-[Add your demo video link here]
+https://www.loom.com/share/9e6955aa78524c32a9873b7d31e5236c?sid=991881a6-1625-4e8e-9aec-8fe265ee27c8
 
 ## License
 
