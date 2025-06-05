@@ -28,7 +28,7 @@ contract DeployTelegramBettingNeon is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        TelegramMultiTokenPriceBetting betting = new TelegramMultiTokenPriceBetting(botAddress, initialTokens);
+        // TelegramMultiTokenPriceBetting betting = new TelegramMultiTokenPriceBetting(botAddress, initialTokens);
 
         vm.stopBroadcast();
     }

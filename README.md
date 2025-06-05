@@ -3,7 +3,7 @@
 A decentralized betting platform that allows users to bet on cryptocurrency price movements using Chainlink price feeds. The platform supports multiple tokens and provides a Telegram bot interface for easy interaction.
 
 <p align="center">
-  <img src="./logo.jpeg" alt="Logo" width="200" style="transform: rotate(-90deg);" />
+  <img src="./logo.jpeg" alt="Logo" width="200" />
 </p>
 
 ## Features

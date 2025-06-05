@@ -6,9 +6,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ContractRegistry} from "@flarenetwork/flare-periphery-contracts/coston2/ContractRegistry.sol";
 import {IFtsoFeedIdConverter} from "@flarenetwork/flare-periphery-contracts/coston2/IFtsoFeedIdConverter.sol";
-import {IPriceReader} from "@flarenetwork/flare-periphery-contracts/coston2/IPriceReader.sol";
+import {TestFtsoV2Interface} from "@flarenetwork/flare-periphery-contracts/coston2/TestFtsoV2Interface.sol";
 
-contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
+contract FlareTelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
     enum Direction {
         HIGHER,
         LOWER
@@ -69,7 +69,7 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
     address public botAddress;
 
     IFtsoFeedIdConverter public feedIdConverter;
-    IPriceReader public priceReader;
+    TestFtsoV2Interface public ftsoV2;
 
     // Events
     event TokenAdded(bytes32 indexed tokenId, string symbol, string name, bytes21 feedId);
@@ -104,7 +104,7 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
         currentBetId = 0;
 
         feedIdConverter = ContractRegistry.getFtsoFeedIdConverter();
-        priceReader = ContractRegistry.getPriceReader();
+        ftsoV2 = ContractRegistry.getTestFtsoV2(); // Use getFtsoV2() for production
 
         // Initialize tokens from constructor
         for (uint256 i = 0; i < _initialTokens.length; i++) {
@@ -112,14 +112,14 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
             require(tokens[tokenId].feedId == bytes21(0), "Token already exists");
 
             bytes21 feedId = feedIdConverter.getFeedId(1, _initialTokens[i].feedSymbol);
-            uint8 decimals = priceReader.getDecimals(feedId);
+            (, int8 decimals, ) = ftsoV2.getFeedById(feedId);
 
             tokens[tokenId] = TokenInfo({
                 symbol: _initialTokens[i].symbol,
                 name: _initialTokens[i].name,
                 feedId: feedId,
                 isActive: true,
-                decimals: decimals
+                decimals: uint8(uint8(decimals))
             });
 
             emit TokenAdded(tokenId, _initialTokens[i].symbol, _initialTokens[i].name, feedId);
@@ -134,10 +134,10 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
         require(tokens[tokenId].feedId == bytes21(0), "Token already exists");
 
         bytes21 feedId = feedIdConverter.getFeedId(1, _feedSymbol);
-        uint8 decimals = priceReader.getDecimals(feedId);
+        (, int8 decimals, ) = ftsoV2.getFeedById(feedId);
 
         tokens[tokenId] =
-            TokenInfo({symbol: _symbol, name: _name, feedId: feedId, isActive: true, decimals: decimals});
+            TokenInfo({symbol: _symbol, name: _name, feedId: feedId, isActive: true, decimals: uint8(uint8(decimals))});
 
         emit TokenAdded(tokenId, _symbol, _name, feedId);
     }
@@ -149,8 +149,9 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
         require(tokens[_tokenId].feedId != bytes21(0), "Token does not exist");
 
         bytes21 newFeedId = feedIdConverter.getFeedId(1, _newFeedSymbol);
+        (, int8 decimals, ) = ftsoV2.getFeedById(newFeedId);
         tokens[_tokenId].feedId = newFeedId;
-        tokens[_tokenId].decimals = priceReader.getDecimals(newFeedId);
+        tokens[_tokenId].decimals = uint8(uint8(decimals));
 
         emit TokenUpdated(_tokenId, newFeedId);
     }
@@ -171,7 +172,7 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
         currentBetId++;
 
         TokenInfo storage token = tokens[_tokenId];
-        (uint256 currentPrice,, uint256 updatedAt) = priceReader.getCurrentPrice(token.feedId);
+        (uint256 currentPrice, uint64 updatedAt) = ftsoV2.getFeedByIdInWei(token.feedId);
 
         if (updatedAt < block.timestamp - 20 * 60 /* 20 minutes */ ) {
             revert("stale price feed");
@@ -248,9 +249,7 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
         require(block.timestamp >= bet.endTime, "Bet still active");
 
         TokenInfo storage token = tokens[bet.tokenId];
-        (uint256 endPrice,, uint256 updatedAt) = priceReader.getCurrentPrice(token.feedId);
-
-        // Optionally, check for stale price here as well
+        (uint256 endPrice, ) = ftsoV2.getFeedByIdInWei(token.feedId);
 
         bet.endPrice = int256(endPrice);
         bet.status = BetStatus.RESOLVED;
@@ -337,9 +336,9 @@ contract TelegramMultiTokenPriceBetting is ReentrancyGuard, Ownable, Pausable {
     /**
      * @dev Get latest price for a token
      */
-    function getLatestPrice(bytes32 _tokenId) external view validToken(_tokenId) returns (int256, uint256) {
+    function getLatestPrice(bytes32 _tokenId) external view validToken(_tokenId) returns (int256, uint64) {
         TokenInfo storage token = tokens[_tokenId];
-        (uint256 price,, uint256 updatedAt) = priceReader.getCurrentPrice(token.feedId);
+        (uint256 price, uint64 updatedAt) = ftsoV2.getFeedByIdInWei(token.feedId);
         return (int256(price), updatedAt);
     }
 
